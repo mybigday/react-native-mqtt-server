@@ -1,13 +1,23 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Text } from 'react-native';
-import { multiply } from 'react-native-mqtt-server';
+import { Server, Client } from 'react-native-mqtt-server';
 
 export default function App() {
-  const [result, setResult] = React.useState<number | undefined>();
+  const server = React.useRef<Server>(new Server({ protocolVersion: 4 }));
 
   React.useEffect(() => {
-    multiply(3, 7).then(setResult);
+    server.current.on('connect', (client: Client) => {
+      client.on('connect', (packet) => {
+        console.log('connect', packet);
+        client.connack({ returnCode: 0 });
+      });
+      client.on('publish', (packet) => {
+        console.log('publish', packet);
+        client.puback({ messageId: packet.messageId });
+      });
+    });
+    server.current.listen(1883);
   }, []);
 
   return (
