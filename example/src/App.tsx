@@ -1,28 +1,22 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Text } from 'react-native';
-import { Server, Client } from 'react-native-mqtt-server';
+import { SimpleMQBroker } from 'react-native-mqtt-server';
+import type { Buffer } from 'buffer';
 
 export default function App() {
-  const server = React.useRef<Server>(new Server({ protocolVersion: 4 }));
+  const broker = React.useRef<SimpleMQBroker>(new SimpleMQBroker());
 
   React.useEffect(() => {
-    server.current.on('connect', (client: Client) => {
-      client.on('connect', (packet) => {
-        console.log('connect', packet);
-        client.connack({ returnCode: 0 });
-      });
-      client.on('publish', (packet) => {
-        console.log('publish', packet);
-        client.puback({ messageId: packet.messageId });
-      });
+    broker.current.on('message', (topic: string, message: Buffer | string) => {
+      console.log('message', topic, message);
     });
-    server.current.listen(1883);
+    broker.current.start();
   }, []);
 
   return (
     <View style={styles.container}>
-      <Text>Result: {result}</Text>
+      <Text>Run MQ broker on 1883</Text>
     </View>
   );
 }

@@ -1,5 +1,5 @@
 import type { Buffer } from 'buffer';
-import type { Packet, PacketCmd, Parser } from 'mqtt-packet';
+import type { Packet, Parser } from 'mqtt-packet';
 import net from 'react-native-tcp-socket';
 import mqtt from 'mqtt-packet';
 import EventEmitter from 'eventemitter3';
@@ -15,7 +15,12 @@ export class Client extends EventEmitter {
     super();
     this._opts = mqttOptions;
     this.socket = socket;
-    this._createParser();
+    this.parser = mqtt.parser(this._opts);
+    this.parser.on('packet', (packet) => {
+      this.emit('data', packet);
+      this.emit(packet.cmd, packet);
+    });
+    this.parser.on('error', this.emit.bind(this, 'error'));
     this.socket.on('data', (data) => {
       this.parser.parse(data! as Buffer);
     });
@@ -23,29 +28,18 @@ export class Client extends EventEmitter {
     this.socket.on('close', this.emit.bind(this, 'close'));
   }
 
-  private _createParser() {
+  setProtocolVersion(version: number) {
+    this._opts = Object.assign({}, this._opts, { protocolVersion: version });
     this.parser = mqtt.parser(this._opts);
     this.parser.on('packet', (packet) => {
+      this.emit('data', packet);
       this.emit(packet.cmd, packet);
     });
     this.parser.on('error', this.emit.bind(this, 'error'));
   }
 
-  on(event: PacketCmd | 'close' | 'error', callback: (packet: Packet) => any) {
-    return super.on(event, callback);
-  }
-
-  setProtocolVersion(version: number) {
-    this._opts = Object.assign({}, this._opts, { protocolVersion: version });
-    this._createParser();
-  }
-
   write(packet: Packet, cb?: Callback | undefined) {
-    try {
-      this.socket.write(mqtt.generate(packet, this._opts), undefined, cb);
-    } catch (err) {
-      cb?.(err);
-    }
+    this.socket.write(mqtt.generate(packet, this._opts), undefined, cb);
   }
 
   end() {
@@ -146,3 +140,5 @@ export class Server extends EventEmitter {
 }
 
 export default Server;
+
+export { SimpleMQBroker } from './simple-mq';
