@@ -28,6 +28,10 @@ export class Client extends EventEmitter {
     this.socket.on('close', this.emit.bind(this, 'close'));
   }
 
+  setKeepAlive(keepalive: number) {
+    this.socket.setKeepAlive(keepalive > 0, keepalive);
+  }
+
   setProtocolVersion(version: number) {
     this._opts = Object.assign({}, this._opts, { protocolVersion: version });
     this.parser = mqtt.parser(this._opts);
@@ -120,11 +124,13 @@ export class Server extends EventEmitter {
   constructor(opts?: Object) {
     super();
     this._opts = opts;
-    this.server = net.createServer((socket: net.Socket) => {
+    this.server = net.createServer();
+    this.server.on('connection', (socket: net.Socket) => {
       this.emit('connection', new Client(socket, this._opts));
     });
     this.server.on('error', this.emit.bind(this, 'error'));
     this.server.on('close', this.emit.bind(this, 'close'));
+    this.server.on('listening', this.emit.bind(this, 'listening'));
   }
 
   listen(

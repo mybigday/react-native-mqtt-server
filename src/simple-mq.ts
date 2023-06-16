@@ -13,6 +13,7 @@ import { Server, Client } from './';
 export interface Options {
   authenticate?: (user?: string, pass?: Buffer) => Promise<boolean> | boolean;
   retryInterval?: number;
+  keepalive?: number;
 }
 
 export interface MQClientSession {
@@ -21,7 +22,6 @@ export interface MQClientSession {
     topic: string;
     payload: string | Buffer;
   };
-  nextId: number;
   subs: { [rule: string]: QoS };
   retry?: ReturnType<typeof setTimeout>;
   alive: boolean;
@@ -49,6 +49,7 @@ export class SimpleMQBroker extends EventEmitter {
   protected clients: { [id: string]: Client };
   protected sessions: { [id: string]: MQClientSession };
   protected retryInterval: number;
+  protected keepalive: number;
   protected authenticate?: (
     user?: string,
     pass?: Buffer
@@ -59,8 +60,12 @@ export class SimpleMQBroker extends EventEmitter {
     this.server = new Server();
     this.authenticate = options.authenticate;
     this.retryInterval = options.retryInterval ?? 3000;
+    this.keepalive = options.keepalive ?? 60;
     this.clients = {};
     this.server.on('connection', this.handleClient.bind(this));
+    this.server.on('error', this.emit.bind(this, 'error'));
+    this.server.on('close', this.emit.bind(this, 'close'));
+    this.server.on('listening', this.emit.bind(this, 'listening'));
     this.sessions = {};
   }
 
@@ -68,9 +73,14 @@ export class SimpleMQBroker extends EventEmitter {
     this.server.listen({ port: port ?? 1883, host: '0.0.0.0' });
   }
 
+  stop() {
+    this.server.close();
+  }
+
   protected handleClient(client: Client) {
     let id: string | undefined;
     let session: MQClientSession | undefined;
+    client.on('data', (packet) => console.log(packet));
     client.on('close', () => {
       if (id && session) {
         delete this.clients[id!];
@@ -89,17 +99,27 @@ export class SimpleMQBroker extends EventEmitter {
       client.setProtocolVersion(version);
       const pass =
         (await this.authenticate?.(packet.username, packet.password)) ?? true;
+      const sessionPresent = packet.clean ? false : !!this.sessions[packet.clientId];
+      const keepalive = packet.keepalive ?? this.keepalive;
       if (pass) {
-        client.connack({ returnCode: 0, reasonCode: 0 });
+        client.connack({
+          returnCode: 0,
+          reasonCode: 0,
+          sessionPresent,
+          attributes: {
+            serverKeepAlive: keepalive,
+          },
+        });
+        client.setKeepAlive(keepalive);
       } else {
         client.connack({ returnCode: 5, reasonCode: 135 });
       }
       id = packet.clientId;
       this.clients[id] = client;
       if (packet.clean) {
-        this.sessions[id] = { nextId: 0, subs: {}, alive: true };
+        this.sessions[id] = { subs: {}, alive: true };
       } else {
-        this.sessions[id] ??= { nextId: 0, subs: {}, alive: true };
+        this.sessions[id] ??= { subs: {}, alive: true };
         this.sessions[id]!.alive = true;
       }
       session = this.sessions[id];
