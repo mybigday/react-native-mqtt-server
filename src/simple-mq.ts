@@ -7,7 +7,7 @@ import type {
   IUnsubscribePacket,
 } from 'mqtt-packet';
 import type { Buffer } from 'buffer';
-import EventEmitter from 'eventemitter3';
+import { EventEmitter } from 'events';
 import { Server, Client } from './';
 
 export interface Options {

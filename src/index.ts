@@ -2,7 +2,7 @@ import type { Buffer } from 'buffer';
 import type { Packet, Parser } from 'mqtt-packet';
 import net from 'react-native-tcp-socket';
 import mqtt from 'mqtt-packet';
-import EventEmitter from 'eventemitter3';
+import { EventEmitter } from 'events';
 
 export type Callback = (err?: Error | undefined) => any;
 
