@@ -124,8 +124,7 @@ export class Server extends EventEmitter {
   constructor(opts?: Object) {
     super();
     this._opts = opts;
-    this.server = net.createServer();
-    this.server.on('connection', (socket: net.Socket) => {
+    this.server = net.createServer((socket: net.Socket) => {
       this.emit('connection', new Client(socket, this._opts));
     });
     this.server.on('error', this.emit.bind(this, 'error'));

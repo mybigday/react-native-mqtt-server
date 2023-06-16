@@ -10,22 +10,24 @@ export default function App() {
   const [started, setStarted] = React.useState(false);
 
   React.useEffect(() => {
-    broker.current.on('error', (err: Error) => {
+    const currBroker = broker.current;
+
+    currBroker.on('error', (err: Error) => {
       setError(err);
       console.error(err);
     });
-    broker.current.on('close', () => {
+    currBroker.on('close', () => {
       setStarted(false);
     });
-    broker.current.on('listening', () => {
+    currBroker.on('listening', () => {
       setStarted(true);
     });
-    broker.current.on('message', (topic: string, message: Buffer | string) => {
+    currBroker.on('message', (topic: string, message: Buffer | string) => {
       console.log('message', topic, message);
     });
-    broker.current.start();
+    currBroker.start();
 
-    return () => broker.current.stop();
+    return () => currBroker.stop();
   }, []);
 
   const stop = React.useCallback(() => {
@@ -40,12 +42,16 @@ export default function App() {
     <View style={styles.container}>
       {started && <Text>Run MQ broker on port 1883</Text>}
       {error && <Text>{error.message}</Text>}
-      {started && <Pressable onPress={stop} style={styles.box}>
-        <Text>Stop</Text>
-      </Pressable>}
-      {!started && <Pressable onPress={start} style={styles.box}>
-        <Text>Start</Text>
-      </Pressable>}
+      {started && (
+        <Pressable onPress={stop} style={styles.box}>
+          <Text>Stop</Text>
+        </Pressable>
+      )}
+      {!started && (
+        <Pressable onPress={start} style={styles.box}>
+          <Text>Start</Text>
+        </Pressable>
+      )}
     </View>
   );
 }
