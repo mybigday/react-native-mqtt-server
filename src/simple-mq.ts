@@ -198,12 +198,26 @@ export class SimpleMQBroker extends EventEmitter {
     });
     client.on('unsubscribe', (packet: IUnsubscribePacket) => {
       if (!session) return;
+      if (Object.keys(session!.subs).length === 0) {
+        client.unsuback({
+          messageId: packet.messageId,
+          reasonCode: 17,
+        });
+        return;
+      }
+      const granted: number[] = [];
       for (const topic of packet.unsubscriptions) {
-        delete session?.subs[topic];
+        if (!session!.subs[topic]) {
+          granted.push(128);
+        } else {
+          delete session!.subs[topic];
+          granted.push(0);
+        }
       }
       client.unsuback({
         messageId: packet.messageId,
         reasonCode: 0,
+        granted,
       });
     });
     client.on('pingreq', () => {
