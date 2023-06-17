@@ -12,6 +12,8 @@ import type { Buffer } from 'buffer';
 import { EventEmitter } from 'events';
 import { Server, Client } from './';
 
+const TOPIC_PART_LIMIT = 16;
+
 export interface Options {
   authenticate?: (user?: string, pass?: Buffer) => Promise<boolean> | boolean;
   retryInterval?: number;
@@ -46,6 +48,14 @@ function matchRule(rule: string, topic: string) {
   }
   return ruleParts.length === topicParts.length;
 }
+
+const verifyTopic = (topic: string) => {
+  if (/^[^#]*(?:\/?#|\/?[^#]*)?$/.test(topic)) {
+    return topic.split('/').length <= TOPIC_PART_LIMIT;
+  } else {
+    return false;
+  }
+};
 
 export class SimpleMQBroker extends EventEmitter {
   protected server: Server;
@@ -172,10 +182,14 @@ export class SimpleMQBroker extends EventEmitter {
     });
     client.on('subscribe', (packet: ISubscribePacket) => {
       if (!session) return;
-      const granted: QoS[] = [];
+      const granted: number[] = [];
       for (const sub of packet.subscriptions) {
-        session!.subs[sub.topic] = sub.qos;
-        granted.push(sub.qos);
+        if (!verifyTopic(sub.topic)) {
+          granted.push(128);
+        } else {
+          session!.subs[sub.topic] = sub.qos;
+          granted.push(sub.qos);
+        }
       }
       client.suback({
         messageId: packet.messageId,
