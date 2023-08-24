@@ -250,13 +250,13 @@ export class SimpleMQBroker extends EventEmitter {
     payload: string | Buffer
   ) {
     this.emit('message', topic, payload);
-    this.publish(messageId, topic, payload);
+    this.publish(topic, payload, messageId);
   }
 
   publish(
-    messageId: number | undefined,
     topic: string,
-    payload: string | Buffer
+    payload: string | Buffer,
+    messageId: number | undefined
   ) {
     const id = messageId ?? this.nextId++;
     for (const cId in this.sessions) {
