@@ -131,7 +131,7 @@ export class SimpleMQBroker extends EventEmitter {
       } else {
         client.connack({ returnCode: 5, reasonCode: 135 });
       }
-      id = packet.clientId;
+      id = `${packet.username ?? 'anonymous'}-${packet.clientId}`;
       this.clients[id] = client;
       session = this.sessions[id] ??= {
         subs: {},

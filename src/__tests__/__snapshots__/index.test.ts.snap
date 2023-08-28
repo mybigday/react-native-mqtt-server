@@ -21,20 +21,20 @@ Object {
 }
 `;
 
-exports[`Work correctly: clientConnected 1`] = `"test"`;
+exports[`Work correctly: clientConnected 1`] = `"anonymous-test"`;
 
-exports[`Work correctly: clientDisconnected 1`] = `"test"`;
+exports[`Work correctly: clientDisconnected 1`] = `"anonymous-test"`;
 
 exports[`Work correctly: messageSend 1`] = `
 Object {
-  "clientId": "test",
+  "clientId": "anonymous-test",
   "messageId": 1000,
 }
 `;
 
 exports[`Work correctly: messageSend 2`] = `
 Object {
-  "clientId": "test",
+  "clientId": "anonymous-test",
   "messageId": 1001,
 }
 `;
