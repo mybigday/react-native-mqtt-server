@@ -103,6 +103,7 @@ export class SimpleMQBroker extends EventEmitter {
     });
     client.on('disconnect', () => {
       client.end();
+      this.emit('clientDisconnected', id);
     });
     client.on('connect', async (packet: IConnectPacket) => {
       if (this.sessions[packet.clientId]?.alive) {
@@ -145,7 +146,7 @@ export class SimpleMQBroker extends EventEmitter {
         session!.subs = {};
         session!.pending = {};
       }
-      this.emit('connect', id);
+      this.emit('clientConnected', id);
     });
     client.on('publish', async (packet: IPublishPacket) => {
       if (!session) return;
@@ -227,6 +228,7 @@ export class SimpleMQBroker extends EventEmitter {
       if (session?.tasks[packet.messageId!] !== undefined) {
         clearInterval(session!.tasks[packet.messageId!]);
         delete session!.tasks[packet.messageId!];
+        this.emit('messageSent', id, packet.messageId);
       }
     });
     client.on('pubrec', (packet: IPubrecPacket) => {
@@ -240,6 +242,7 @@ export class SimpleMQBroker extends EventEmitter {
       if (session?.tasks[packet.messageId!] !== undefined) {
         clearInterval(session!.tasks[packet.messageId!]);
         delete session!.tasks[packet.messageId!];
+        this.emit('messageSent', id, packet.messageId);
       }
     });
   }
