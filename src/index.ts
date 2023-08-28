@@ -1,6 +1,6 @@
 import type { Buffer } from 'buffer';
 import type { Packet, Parser } from 'mqtt-packet';
-import net from 'react-native-tcp-socket';
+import net from 'net';
 import mqtt from 'mqtt-packet';
 import { EventEmitter } from 'events';
 
