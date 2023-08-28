@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Work correctly: client 1`] = `
+Object {
+  "message": "test",
+  "topic": "test",
+}
+`;
+
+exports[`Work correctly: client 2`] = `
+Object {
+  "message": "test/2/should/be/received",
+  "topic": "test/2/should/be/received",
+}
+`;
+
+exports[`Work correctly: client 3`] = `
+Object {
+  "message": "test/path",
+  "topic": "test/path",
+}
+`;
+
+exports[`Work correctly: clientConnected 1`] = `"test"`;
+
+exports[`Work correctly: clientDisconnected 1`] = `"test"`;
+
+exports[`Work correctly: messageSend 1`] = `
+Object {
+  "clientId": "test",
+  "messageId": 1000,
+}
+`;
+
+exports[`Work correctly: messageSend 2`] = `
+Object {
+  "clientId": "test",
+  "messageId": 1001,
+}
+`;
+
+exports[`Work correctly: server 1`] = `
+Object {
+  "message": "test",
+  "topic": "test",
+}
+`;
+
+exports[`Work correctly: server 2`] = `
+Object {
+  "message": "test/path",
+  "topic": "test/path",
+}
+`;
+
+exports[`Work correctly: server 3`] = `
+Object {
+  "message": "test/1/should/not/be/received",
+  "topic": "test/1/should/not/be/received",
+}
+`;
+
+exports[`Work correctly: server 4`] = `
+Object {
+  "message": "test/2/should/be/received",
+  "topic": "test/2/should/be/received",
+}
+`;
