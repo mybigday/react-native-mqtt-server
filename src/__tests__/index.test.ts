@@ -2,6 +2,8 @@ import * as mqtt from 'mqtt';
 import net, { AddressInfo } from 'net';
 import { SimpleMQBroker } from '../index';
 
+jest.mock('react-native-tcp-socket', () => require('net'));
+
 const getFreePort = () =>
   new Promise<number>((resolve, reject) => {
     const server = net.createServer();
