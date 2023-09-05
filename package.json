@@ -1,6 +1,6 @@
 {
   "name": "react-native-mqtt-server",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "test",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -148,7 +148,12 @@
     "source": "src",
     "output": "lib",
     "targets": [
-      ["commonjs", { "configFile": true }],
+      [
+        "commonjs",
+        {
+          "configFile": true
+        }
+      ],
       "module",
       [
         "typescript",
