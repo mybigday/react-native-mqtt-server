@@ -2,7 +2,7 @@ import type { Buffer } from 'buffer';
 import type { Packet, Parser } from 'mqtt-packet';
 import net from 'react-native-tcp-socket';
 import mqtt from 'mqtt-packet';
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'tseep';
 
 export type Callback = (err?: Error | undefined) => any;
 
@@ -20,12 +20,18 @@ export class Client extends EventEmitter {
       this.emit('data', packet);
       this.emit(packet.cmd, packet);
     });
-    this.parser.on('error', this.emit.bind(this, 'error'));
+    this.parser.on('error', (err) => {
+      this.emit('error', err);
+    });
     this.socket.on('data', (data) => {
       this.parser.parse(data! as Buffer);
     });
-    this.socket.on('error', this.emit.bind(this, 'error'));
-    this.socket.on('close', this.emit.bind(this, 'close'));
+    this.socket.on('error', (err) => {
+      this.emit('error', err);
+    });
+    this.socket.on('close', () => {
+      this.emit('close');
+    });
   }
 
   setKeepAlive(keepalive: number) {

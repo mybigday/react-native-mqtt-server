@@ -9,7 +9,7 @@ import type {
   IUnsubscribePacket,
 } from 'mqtt-packet';
 import type { Buffer } from 'buffer';
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'tseep';
 import { Server, Client } from './';
 
 const TOPIC_PART_LIMIT = 16;
@@ -77,9 +77,15 @@ export class SimpleMQBroker extends EventEmitter {
     this.keepalive = options.keepalive ?? 60;
     this.clients = {};
     this.server.on('connection', this.handleClient.bind(this));
-    this.server.on('error', this.emit.bind(this, 'error'));
-    this.server.on('close', this.emit.bind(this, 'close'));
-    this.server.on('listening', this.emit.bind(this, 'listening'));
+    this.server.on('error', (err) => {
+      this.emit('error', err);
+    });
+    this.server.on('close', () => {
+      this.emit('close');
+    });
+    this.server.on('listening', () => {
+      this.emit('listening');
+    });
     this.sessions = {};
     this.nextId = 1000;
   }

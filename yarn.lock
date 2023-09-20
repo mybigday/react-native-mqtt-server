@@ -9706,6 +9706,11 @@ ts-node@^10.8.1:
     v8-compile-cache-lib "^3.0.1"
     yn "3.1.1"
 
+tseep@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/tseep/-/tseep-1.1.1.tgz#76d333d4a354cbfc627e957e49903cc53f46e17e"
+  integrity sha512-w2MjaqNWGDeliT5/W+/lhhnR0URiVwXXsXbkAZjQVywrOpdKhQAOL1ycyHfNOV1QBjouC7FawNmJePet1sGesw==
+
 tslib@^1.8.1:
   version "1.14.1"
   resolved "https://registry.npmjs.org/tslib/-/tslib-1.14.1.tgz"
