@@ -101,15 +101,14 @@ export class SimpleMQBroker extends EventEmitter {
   protected handleClient(client: Client) {
     let id: string | undefined;
     let session: MQClientSession | undefined;
-    client.on('error', (err) => {
-      this.emit('error', err);
-    });
-    client.on('close', () => {
+    const connectionBroken = () => {
       if (id && session) {
         delete this.clients[id!];
         session!.alive = false;
       }
-    });
+    };
+    client.on('error', connectionBroken);
+    client.on('close', connectionBroken);
     client.on('disconnect', () => {
       client.end();
       this.emit('clientDisconnected', id);
