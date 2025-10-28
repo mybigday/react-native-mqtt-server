@@ -94,7 +94,18 @@ export class SimpleMQBroker extends EventEmitter {
     this.server.listen({ port: port ?? 1883, host: '0.0.0.0' });
   }
 
-  stop() {
+  async stop() {
+    await Promise.all(
+      Object.values(this.clients).map(
+        (client) =>
+          new Promise<void>((resolve) => {
+            client.disconnect({ reasonCode: 0x8b }, () => {
+              client.end();
+              resolve();
+            });
+          })
+      )
+    );
     this.server.close();
   }
 

@@ -27,7 +27,9 @@ export default function App() {
     });
     currBroker.start();
 
-    return () => currBroker.stop();
+    return () => {
+      currBroker.stop();
+    };
   }, []);
 
   const stop = React.useCallback(() => {
